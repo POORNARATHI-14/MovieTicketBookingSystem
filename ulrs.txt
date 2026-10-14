@@ -1,0 +1,150 @@
+http://localhost:8080/
+
+http://localhost:8080/register.html
+
+http://localhost:8080/login.html
+
+http://localhost:8080/theatres.html
+
+http://localhost:8080/bookings.html
+
+http://localhost:8080/admin.html
+
+
+\sql
+\connect root@localhost:3306
+SHOW DATABASES;
+USE movie_ticket_booking_db;
+SHOW TABLES;
+
+
+SELECT id, name, email, role
+FROM users;
+
+SELECT * FROM movies;
+
+SELECT * FROM bookings;
+
+SELECT * FROM payments;
+
+SELECT * FROM saga_transactions;
+
+
+8.0.46
+
+Copyright (c) 2016, 2026, Oracle and/or its affiliates.
+Oracle is a registered trademark of Oracle Corporation and/or its affiliates.
+Other names may be trademarks of their respective owners.
+
+Type '\help' or '\?' for help; '\quit' to exit.
+ MySQL  JS > SHOW DATABASES;
+Expected ; but found DATABASES (SyntaxError)
+ MySQL  JS > \sql
+Switching to SQL mode... Commands end with ;
+ MySQL  SQL > SHOW DATABASES;
+ERROR: Not connected.
+ MySQL  SQL > \connect root@localhost:3306
+Creating a session to 'root@localhost:3306'
+Please provide the password for 'root@localhost:3306': ************
+Save password for 'root@localhost:3306'? [Y]es/[N]o/Ne[v]er (default No): y
+Fetching global names for auto-completion... Press ^C to stop.
+Your MySQL connection id is 109
+Server version: 8.0.46 MySQL Community Server - GPL
+No default schema selected; type \use <schema> to set one.
+ MySQL  localhost:3306 ssl  SQL > SHOW DATABASES;
++-------------------------+
+| Database                |
++-------------------------+
+| information_schema      |
+| movie_ticket_booking_db |
+| mysql                   |
+| order_saga_db           |
+| performance_schema      |
+| restaurant_queue        |
+| sakila                  |
+| sys                     |
+| world                   |
++-------------------------+
+9 rows in set (0.0018 sec)
+ MySQL  localhost:3306 ssl  SQL > USE movie_ticket_booking_db;
+Default schema set to `movie_ticket_booking_db`.
+Fetching global names, object names from `movie_ticket_booking_db` for auto-completion... Press ^C to stop.
+ MySQL  localhost:3306 ssl  movie_ticket_booking_db  SQL > SHOW TABLES;
++-----------------------------------+
+| Tables_in_movie_ticket_booking_db |
++-----------------------------------+
+| bookings                          |
+| flyway_schema_history             |
+| movies                            |
+| notifications                     |
+| outbox_events                     |
+| payments                          |
+| saga_transactions                 |
+| seats                             |
+| shows                             |
+| theatres                          |
+| users                             |
++-----------------------------------+
+11 rows in set (0.0267 sec)
+ MySQL  localhost:3306 ssl  movie_ticket_booking_db  SQL > SELECT id, name, email, role
+                                                        -> FROM users;
++----+---------------+-------------------------+-------+
+| id | name          | email                   | role  |
++----+---------------+-------------------------+-------+
+|  1 | Administrator | admin@movieticket.local | ADMIN |
+|  2 | Poorna Rathi  | poornarathi@gmail.com   | USER  |
++----+---------------+-------------------------+-------+
+2 rows in set (0.0196 sec)
+ MySQL  localhost:3306 ssl  movie_ticket_booking_db  SQL > SELECT * FROM movies;
++----+-----------------+--------+--------------+----------+--------------------------------------------------------------------------------------+
+| id | title           | genre  | duration_min | language | description                                                                          |
++----+-----------------+--------+--------------+----------+--------------------------------------------------------------------------------------+
+|  1 | Interstellar    | Sci-Fi |          169 | English  | A team of explorers travels through a wormhole in search of a new home for humanity. |
+|  2 | The Dark Knight | Action |          152 | English  | Batman faces the Joker in Gotham City.                                               |
+|  3 | 3 Idiots        | Comedy |          170 | Hindi    | Three engineering students and a friendship that changes how they see education.     |
+|  4 | Vikram          | Action |          174 | Tamil    | A black-ops squad hunts a masked gang behind a string of murders.                    |
++----+-----------------+--------+--------------+----------+--------------------------------------------------------------------------------------+
+4 rows in set (0.0018 sec)
+ MySQL  localhost:3306 ssl  movie_ticket_booking_db  SQL > SELECT * FROM bookings;
++----+---------+---------+---------+-----------+--------------+--------------------------------------+------------------------------------------------------------------+----------------+----------------------------+----------------------------+
+| id | user_id | show_id | seat_id | status    | total_amount | idempotency_key                      | request_hash                                                     | failure_reason | created_at                 | updated_at                 |
++----+---------+---------+---------+-----------+--------------+--------------------------------------+------------------------------------------------------------------+----------------+----------------------------+----------------------------+
+|  1 |       2 |       1 |     316 | CONFIRMED |       200.00 | c6d25649-fcb1-4279-afeb-3554c24d8b09 | d3eef8029a93ca478627a5b46699dfd8d9efaa42fd178e03cfac75b89bb14e52 | NULL           | 2026-10-13 12:11:11.842213 | 2026-10-13 12:11:12.461854 |
+|  2 |       2 |       1 |     317 | CONFIRMED |       200.00 | 9e81aa2c-9cef-47a1-ac64-210bc7f64ca0 | ba91167271d0864d3a08b2fedcd9e5403bddebc9ac4953dfabacc0bb0fae80e1 | NULL           | 2026-10-13 12:11:12.548613 | 2026-10-13 12:11:12.978829 |
+|  3 |       2 |       1 |     318 | CONFIRMED |       200.00 | e13196cf-db87-410e-9dd1-18df283d0263 | 5e8ae6bfba972c45a9a574e273fc0cb17cc2edff8e3308fc4c46b335c6af7c15 | NULL           | 2026-10-13 12:11:13.045418 | 2026-10-13 12:11:13.503670 |
+|  4 |       2 |       1 |     319 | CONFIRMED |       200.00 | 284ed290-1880-4ac1-ba70-89d605d5d0a9 | a98775dd45705c6ac22b5aa6cddfe5761250dc3892bfb5ceda01977e8888cec1 | NULL           | 2026-10-13 12:11:13.579635 | 2026-10-13 12:11:14.025035 |
+|  5 |       2 |       1 |     320 | CONFIRMED |       200.00 | 21d92106-a051-4e4f-8078-153196d066ef | 6a0b6048d94280d1a60fa2598e03e0c89a611b42decf5af124508453b2ba7ea5 | NULL           | 2026-10-13 12:11:14.076610 | 2026-10-13 12:11:14.500133 |
+|  6 |       2 |       1 |     321 | CONFIRMED |       200.00 | 5314355e-29ee-45dd-a490-5039689d6005 | a75c080d93f30febe513ec28ac59b6242a1469babf83b5b8eecc69f3e726322b | NULL           | 2026-10-13 12:11:14.574495 | 2026-10-13 12:11:15.016484 |
+|  7 |       2 |       1 |     322 | CONFIRMED |       200.00 | 559bead5-7007-420d-b28b-a659cc10dfc4 | bd4de3afe3ff7fbcfd89c5c81cf4cbda2feb9ba1f5bca0944a7588cb9e8e3daa | NULL           | 2026-10-13 12:11:15.084185 | 2026-10-13 12:11:15.527118 |
+|  8 |       2 |       1 |     323 | CONFIRMED |       200.00 | 8508401c-61a9-4571-9afe-f54d5a250bfc | 59c5c660ed28dc3000d3c4737c5e6d15f8a66404f2329c31a2a8765502527827 | NULL           | 2026-10-13 12:11:15.591998 | 2026-10-13 12:11:16.058789 |
++----+---------+---------+---------+-----------+--------------+--------------------------------------+------------------------------------------------------------------+----------------+----------------------------+----------------------------+
+8 rows in set (0.0018 sec)
+ MySQL  localhost:3306 ssl  movie_ticket_booking_db  SQL > SELECT * FROM payments;
++----+------------+--------+-----------+--------------+------------------------------------------+------------------------------------------------------------------+-------------------+----------------+----------------------------+----------------------------+
+| id | booking_id | amount | status    | method       | idempotency_key                          | request_hash                                                     | gateway_reference | failure_reason | created_at                 | updated_at                 |
++----+------------+--------+-----------+--------------+------------------------------------------+------------------------------------------------------------------+-------------------+----------------+----------------------------+----------------------------+
+|  1 |          1 | 200.00 | COMPLETED | TEST_SUCCESS | pay-c6d25649-fcb1-4279-afeb-3554c24d8b09 | 874d35e1c776277651e12ef2a86a4101efdb5652825e83ade98c0e2ab5dc0608 | SIM-63aa380d-0f9  | NULL           | 2026-10-13 12:11:12.059202 | 2026-10-13 12:11:12.394530 |
+|  2 |          2 | 200.00 | COMPLETED | TEST_SUCCESS | pay-9e81aa2c-9cef-47a1-ac64-210bc7f64ca0 | 66655575c7bbdd77675cf9a4e7912df5f8a051b4eea208d9b5c030e5f201ac48 | SIM-9906eb84-be4  | NULL           | 2026-10-13 12:11:12.609314 | 2026-10-13 12:11:12.938185 |
+|  3 |          3 | 200.00 | COMPLETED | TEST_SUCCESS | pay-e13196cf-db87-410e-9dd1-18df283d0263 | bf3758666dfa5dd764bb6acf8d3e2c8395d9882d51cef73914dcde0a8c7d1712 | SIM-45ff4158-723  | NULL           | 2026-10-13 12:11:13.119926 | 2026-10-13 12:11:13.442864 |
+|  4 |          4 | 200.00 | COMPLETED | TEST_SUCCESS | pay-284ed290-1880-4ac1-ba70-89d605d5d0a9 | 55a193412244504f3154c8f621272c5769e923f591ba8ea4de862f9da3167e94 | SIM-5504f12e-8db  | NULL           | 2026-10-13 12:11:13.654613 | 2026-10-13 12:11:13.968060 |
+|  5 |          5 | 200.00 | COMPLETED | TEST_SUCCESS | pay-21d92106-a051-4e4f-8078-153196d066ef | fa714c5eb3d7f97c88d7724cf788d256cffd2233e043706b963be7d67ea0bbc4 | SIM-a2248893-783  | NULL           | 2026-10-13 12:11:14.127148 | 2026-10-13 12:11:14.449708 |
+|  6 |          6 | 200.00 | COMPLETED | TEST_SUCCESS | pay-5314355e-29ee-45dd-a490-5039689d6005 | 129d6f4387efac613f4897b8481d460789489be160ae88c3634c46110e09e042 | SIM-fb2af357-4a3  | NULL           | 2026-10-13 12:11:14.626143 | 2026-10-13 12:11:14.955093 |
+|  7 |          7 | 200.00 | COMPLETED | TEST_SUCCESS | pay-559bead5-7007-420d-b28b-a659cc10dfc4 | 5be6af036fc02f7f47c22521f5945860354d5bc28163a0585c805e1721a6aa06 | SIM-9c33a154-1e5  | NULL           | 2026-10-13 12:11:15.145352 | 2026-10-13 12:11:15.470552 |
+|  8 |          8 | 200.00 | COMPLETED | TEST_SUCCESS | pay-8508401c-61a9-4571-9afe-f54d5a250bfc | 3342cf6ad642d628e9cff09b1f8e9e754ee5ae858c0f6085722eec8c53512a27 | SIM-fa2544b9-01c  | NULL           | 2026-10-13 12:11:15.676737 | 2026-10-13 12:11:16.007269 |
++----+------------+--------+-----------+--------------+------------------------------------------+------------------------------------------------------------------+-------------------+----------------+----------------------------+----------------------------+
+8 rows in set (0.0020 sec)
+ MySQL  localhost:3306 ssl  movie_ticket_booking_db  SQL > SELECT * FROM saga_transactions;
++----+------------+-------------------+-----------+----------------+----------------------------+----------------------------+
+| id | booking_id | current_step      | status    | failure_reason | started_at                 | updated_at                 |
++----+------------+-------------------+-----------+----------------+----------------------------+----------------------------+
+|  1 |          1 | BOOKING_CONFIRMED | COMPLETED | NULL           | 2026-10-13 12:11:11.842213 | 2026-10-13 12:11:12.461854 |
+|  2 |          2 | BOOKING_CONFIRMED | COMPLETED | NULL           | 2026-10-13 12:11:12.548613 | 2026-10-13 12:11:12.978829 |
+|  3 |          3 | BOOKING_CONFIRMED | COMPLETED | NULL           | 2026-10-13 12:11:13.045418 | 2026-10-13 12:11:13.509644 |
+|  4 |          4 | BOOKING_CONFIRMED | COMPLETED | NULL           | 2026-10-13 12:11:13.579635 | 2026-10-13 12:11:14.025035 |
+|  5 |          5 | BOOKING_CONFIRMED | COMPLETED | NULL           | 2026-10-13 12:11:14.076610 | 2026-10-13 12:11:14.510710 |
+|  6 |          6 | BOOKING_CONFIRMED | COMPLETED | NULL           | 2026-10-13 12:11:14.574495 | 2026-10-13 12:11:15.021493 |
+|  7 |          7 | BOOKING_CONFIRMED | COMPLETED | NULL           | 2026-10-13 12:11:15.084185 | 2026-10-13 12:11:15.532182 |
+|  8 |          8 | BOOKING_CONFIRMED | COMPLETED | NULL           | 2026-10-13 12:11:15.591998 | 2026-10-13 12:11:16.066956 |
++----+------------+-------------------+-----------+----------------+----------------------------+----------------------------+
+8 rows in set (0.0026 sec)
+ MySQL  localhost:3306 ssl  movie_ticket_booking_db  SQL >

@@ -1,0 +1,12 @@
+flowchart TD
+    start([POST /api/bookings]) --> s1[1. Create PENDING booking + saga row]
+    s1 --> s2{2. Lock seat<br/>atomic UPDATE}
+    s2 -- 0 rows --> c1[Compensate: booking CANCELLED<br/>notify user] --> r409([HTTP 409 SEAT_UNAVAILABLE])
+    s2 -- 1 row --> s3{3. Charge payment<br/>simulated, idempotent}
+    s3 -- declined / timeout --> c2[Compensate:<br/>booking CANCELLED<br/>release seat lock<br/>keep FAILED payment record<br/>notify user] --> r402([HTTP 402 PAYMENT_FAILED])
+    s3 -- captured --> s4{4. Confirm seat<br/>lock valid and ours?}
+    s4 -- no: lock expired / later step failed --> c3[Compensate:<br/>REFUND payment<br/>booking CANCELLED<br/>release seat<br/>notify user] --> r409b([HTTP 409 + refunded])
+    s4 -- yes --> ok[Seat BOOKED<br/>booking CONFIRMED<br/>saga COMPLETED<br/>notify user] --> r201([HTTP 201 CONFIRMED])
+
+    crash[[Application crash mid-saga]] -.-> rec[SagaRecoveryJob finds saga IN_PROGRESS<br/>after 60 s] -.-> c2
+    expire[[Seat hold unpaid for 5 min]] -.-> job[SeatLockExpiryJob] -.-> c4[Release seat, cancel booking<br/>refund if a payment was captured]

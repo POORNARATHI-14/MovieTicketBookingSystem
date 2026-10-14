@@ -1,0 +1,43 @@
+flowchart TB
+    client["Postman / any REST client"]
+
+    subgraph app["ONE Spring Boot application - modular monolith (not separate microservices)"]
+        direction TB
+        sec["Security: JWT filter + roles (USER / ADMIN)"]
+        subgraph api["REST controllers"]
+            uc[User] --- mc[Movie] --- tc[Theatre] --- sc[Show] --- sec2[Seat]
+            bc[Booking] --- pc[Payment] --- nc[Notification]
+        end
+        subgraph saga["saga package"]
+            orch["BookingSagaOrchestrator<br/>(steps + compensation)"]
+            exp["SeatLockExpiryJob"]
+            rec["SagaRecoveryJob"]
+        end
+        subgraph domain["domain services"]
+            seat["SeatService<br/>atomic conditional UPDATEs"]
+            pay["PaymentService<br/>idempotent + simulated gateway"]
+            notif["NotificationService"]
+            evpub["DomainEventPublisher<br/>(writes outbox row)"]
+        end
+        relay["OutboxRelay (only if RabbitMQ enabled)"]
+    end
+
+    mysql[("MySQL<br/>movie_ticket_booking_db<br/>Flyway migrations")]
+    rabbit{{"RabbitMQ (optional)<br/>topic exchange movieticket.events"}}
+    consumer["AuditEventListener<br/>(demo consumer)"]
+
+    client -->|HTTPS/JSON + Bearer token| sec --> api
+    bc --> orch
+    pc --> orch
+    orch --> seat
+    orch --> pay
+    orch --> notif
+    orch --> evpub
+    exp --> orch
+    rec --> orch
+    seat --> mysql
+    pay --> mysql
+    notif --> mysql
+    evpub -->|same DB transaction| mysql
+    relay -->|poll PENDING rows<br/>SELECT .. FOR UPDATE SKIP LOCKED| mysql
+    relay -->|publish + confirm| rabbit --> consumer

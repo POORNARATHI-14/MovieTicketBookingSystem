@@ -1,0 +1,8 @@
+stateDiagram-v2
+    [*] --> AVAILABLE
+    AVAILABLE --> TEMPORARILY_LOCKED : lock\nUPDATE ... WHERE status='AVAILABLE'\n(1 row = winner, 0 rows = HTTP 409)
+    TEMPORARILY_LOCKED --> BOOKED : confirm after payment\nWHERE locked_by=this booking\nAND locked_until > now
+    TEMPORARILY_LOCKED --> AVAILABLE : payment failed / timeout\n(compensation release)
+    TEMPORARILY_LOCKED --> AVAILABLE : lock expired\nWHERE locked_until <= now\n(SeatLockExpiryJob)
+    BOOKED --> AVAILABLE : confirmed booking cancelled\n(refund)
+    BOOKED --> [*]

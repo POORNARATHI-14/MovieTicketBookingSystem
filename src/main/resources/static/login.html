@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login - CineBook</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AC%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body data-page="login">
+<header id="nav"></header>
+<main><div class="container">
+<div class="card auth-box"><h1>Welcome back</h1><p class="muted">Log in to book tickets and see your bookings.</p>
+<div id="msg"></div>
+<form id="loginForm" novalidate><label for="email">Email</label><input id="email" type="email" autocomplete="username" required>
+<label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required>
+<button class="btn primary block" style="margin-top:20px" id="submit">Log in</button></form>
+<p class="center muted small" style="margin-top:16px">New here? <a href="register.html">Create an account</a></p></div>
+</div></main>
+<footer id="footer"></footer>
+<div id="toasts" aria-live="polite"></div>
+<script src="js/core.js"></script>
+<script src="js/pages_auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+target/
+*.class
+*.log
+.idea/
+.vscode/
+*.iml
+.env
+scripts/set-env.ps1
+*.zip

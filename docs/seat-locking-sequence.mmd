@@ -1,0 +1,21 @@
+sequenceDiagram
+    autonumber
+    participant A as User A
+    participant B as User B
+    participant S as Saga + SeatService
+    participant DB as MySQL (seats row)
+
+    par simultaneous requests for seat 7
+        A->>S: POST /api/bookings (key-A, seat 7)
+        B->>S: POST /api/bookings (key-B, seat 7)
+    end
+    S->>DB: A: UPDATE seats SET TEMPORARILY_LOCKED ... WHERE id=7 AND status='AVAILABLE'
+    S->>DB: B: UPDATE seats SET TEMPORARILY_LOCKED ... WHERE id=7 AND status='AVAILABLE'
+    Note over DB: InnoDB row lock: the updates run one after the other
+    DB-->>S: A: 1 row affected (WINNER)
+    DB-->>S: B: 0 rows affected (status no longer AVAILABLE)
+    S-->>B: 409 SEAT_UNAVAILABLE (booking cancelled, never charged)
+    S->>S: A: charge payment (simulated)
+    S->>DB: A: UPDATE seats SET BOOKED WHERE locked_by=A AND status='TEMPORARILY_LOCKED' AND locked_until > now
+    DB-->>S: 1 row affected
+    S-->>A: 201 booking CONFIRMED

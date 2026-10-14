@@ -1,0 +1,39 @@
+sequenceDiagram
+    autonumber
+    actor U as Client
+    participant C as BookingController
+    participant O as BookingSagaOrchestrator
+    participant Se as SeatService
+    participant P as PaymentService (simulated gateway)
+    participant DB as MySQL
+    participant Ob as outbox_events
+
+    U->>C: POST /api/bookings  (Idempotency-Key)
+    C->>O: execute()
+    rect rgb(235,245,255)
+    Note over O,DB: STEP 1 - transaction 1
+    O->>DB: INSERT booking PENDING + saga(BOOKING_CREATED)
+    O->>Ob: BookingCreated
+    end
+    rect rgb(235,245,255)
+    Note over O,DB: STEP 2 - transaction 2
+    O->>Se: lock(seat)
+    Se->>DB: AVAILABLE -> TEMPORARILY_LOCKED (atomic)
+    O->>DB: saga(SEAT_LOCKED)
+    O->>Ob: SeatLocked
+    end
+    Note over O,P: STEP 3 - payment, idempotent
+    O->>P: processPayment(key = pay-<key>)
+    P->>DB: INSERT payment PENDING (unique key)
+    P->>P: gateway.charge() - outside any DB transaction
+    P->>DB: PENDING -> COMPLETED
+    P->>Ob: PaymentCompleted
+    rect rgb(235,255,235)
+    Note over O,DB: STEP 4 - transaction 4
+    O->>Se: confirm(seat) - only if lock still valid and ours
+    Se->>DB: TEMPORARILY_LOCKED -> BOOKED
+    O->>DB: booking CONFIRMED, saga COMPLETED, notification
+    O->>Ob: BookingConfirmed
+    end
+    O-->>C: BookingResult
+    C-->>U: 201 CONFIRMED

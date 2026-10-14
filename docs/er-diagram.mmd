@@ -1,0 +1,87 @@
+erDiagram
+    USERS ||--o{ BOOKINGS : makes
+    USERS ||--o{ NOTIFICATIONS : receives
+    MOVIES ||--o{ SHOWS : "is screened as"
+    THEATRES ||--o{ SHOWS : hosts
+    SHOWS ||--o{ SEATS : has
+    SHOWS ||--o{ BOOKINGS : "booked for"
+    SEATS ||--o{ BOOKINGS : "reserved by"
+    BOOKINGS ||--o{ PAYMENTS : "paid by (audit, never deleted)"
+    BOOKINGS ||--|| SAGA_TRANSACTIONS : "tracked by"
+    BOOKINGS |o--o| SEATS : "currently locks (locked_by_booking_id)"
+    BOOKINGS ||--o{ OUTBOX_EVENTS : "emits (aggregate_id)"
+
+    USERS {
+        bigint id PK
+        varchar email UK
+        varchar password_hash "BCrypt"
+        varchar role "USER or ADMIN"
+        datetime created_at
+    }
+    MOVIES {
+        bigint id PK
+        varchar title
+        varchar genre
+        int duration_min "CHECK > 0"
+        varchar language
+    }
+    THEATRES {
+        bigint id PK
+        varchar name
+        varchar city
+        int total_screens "CHECK >= 1"
+    }
+    SHOWS {
+        bigint id PK
+        bigint movie_id FK
+        bigint theatre_id FK
+        int screen_no
+        datetime show_time
+        decimal price "CHECK > 0"
+    }
+    SEATS {
+        bigint id PK
+        bigint show_id FK
+        varchar seat_number "UK with show_id"
+        varchar status "AVAILABLE, TEMPORARILY_LOCKED, BOOKED"
+        datetime locked_until
+        bigint locked_by_booking_id FK
+    }
+    BOOKINGS {
+        bigint id PK
+        bigint user_id FK
+        bigint show_id FK
+        bigint seat_id FK
+        varchar status "PENDING, CONFIRMED, CANCELLED"
+        decimal total_amount "CHECK >= 0"
+        varchar idempotency_key UK
+        char request_hash
+    }
+    PAYMENTS {
+        bigint id PK
+        bigint booking_id FK
+        decimal amount "CHECK >= 0"
+        varchar status "PENDING, COMPLETED, FAILED, REFUNDED"
+        varchar idempotency_key UK
+    }
+    NOTIFICATIONS {
+        bigint id PK
+        bigint user_id FK
+        varchar type
+        varchar message
+        tinyint is_read
+    }
+    SAGA_TRANSACTIONS {
+        bigint id PK
+        bigint booking_id FK, UK
+        varchar current_step
+        varchar status
+        varchar failure_reason
+    }
+    OUTBOX_EVENTS {
+        bigint id PK
+        varchar event_type
+        bigint aggregate_id
+        json payload
+        varchar status "PENDING, PUBLISHED"
+    }
